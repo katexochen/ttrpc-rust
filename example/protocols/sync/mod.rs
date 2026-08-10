@@ -8,3 +8,5 @@ pub mod oci;
 // @generated
 pub mod agent;
 pub mod health;
+pub mod well_known;
+pub mod well_known_ttrpc;
