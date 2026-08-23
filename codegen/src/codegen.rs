@@ -1,6 +1,7 @@
 use prost::Message;
 use prost_build::Config;
 use prost_types::FileDescriptorSet;
+use std::collections::HashSet;
 use std::fs::{self, File};
 use std::io::{self, BufReader, Read, Write};
 use std::path::{Path, PathBuf};
@@ -211,8 +212,12 @@ impl CodegenImpl {
         let fd_set = FileDescriptorSet::decode(&buffer as &[u8])
             .map_err(|e| io::Error::other(format!("decode fd_set: {e}")))?;
 
+        let mut seen = HashSet::new();
         for fd in fd_set.file.iter() {
             let rs_path = self.out_dir.join(format!("{}.rs", fd.package()));
+            if !seen.insert(rs_path.clone()) {
+                continue;
+            }
             let mut f = match File::open(&rs_path) {
                 Ok(f) => f,
                 _ => continue,
